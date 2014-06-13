@@ -69,13 +69,50 @@ def test_ds_option(testdir, monkeypatch):
 
 
 def test_ds_non_existent(testdir, monkeypatch):
-    # Make sure we do not fail with INTERNALERROR if an incorrect
-    # DJANGO_SETTINGS_MODULE is given.
+    """
+    Make sure we do not fail with INTERNALERROR if an incorrect
+    DJANGO_SETTINGS_MODULE is given.
+    """
     monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'DOES_NOT_EXIST')
     testdir.makepyfile('def test_ds(): pass')
     result = testdir.runpytest()
-    result.stderr.fnmatch_lines(
-        ["*Could not import settings 'DOES_NOT_EXIST' (Is it on sys.path?*):*"])
+    # NOTE: the error is on stdout, because it happens during the testrun.
+    result.stdout.fnmatch_lines(
+        ["*ERROR at setup of test_ds*",
+         "*UsageError: pytest_django: failed to load Django settings: "
+         "Could not import settings 'DOES_NOT_EXIST' (Is it on sys.path?*): *"])
+
+
+def test_ds_after_user_conftest(testdir, monkeypatch):
+    """
+    Test that the settings module can be imported, after pytest has adjusted
+    the sys.path.
+    """
+    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'settings_after_conftest')
+    testdir.makepyfile('def test_ds(): pass')
+    testdir.makepyfile(settings_after_conftest="SECRET_KEY='secret'")
+    # testdir.makeconftest("import sys; print(sys.path)")
+    result = testdir.runpytest('-v')
+    result.stdout.fnmatch_lines(['*1 passed*'])
+
+
+def test_ds_after_user_conftest_subdir(testdir, monkeypatch):
+    """
+    Test that the settings module can be imported, after pytest has adjusted
+    the sys.path according to the conftest module (in a subdirectory).
+    """
+    monkeypatch.setenv('DJANGO_SETTINGS_MODULE', 'settings.after_conftest')
+
+    testdir.mkdir('project')
+    testdir.mkdir('project/src').join('conftest.py').write(
+        'import sys; print(sys.path)', ensure=True)
+    testdir.mkpydir('project/src/settings').join('after_conftest.py').write(
+        "SECRET_KEY='secret'")
+    testdir.tmpdir.join('project/tests').join('test_tests.py').write(
+        'def test_ds(): pass', ensure=True)
+
+    result = testdir.runpytest('-v')
+    result.stdout.fnmatch_lines(['*1 passed*'])
 
 
 def test_django_settings_configure(testdir, monkeypatch):

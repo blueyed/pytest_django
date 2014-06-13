@@ -12,7 +12,7 @@ from .db_reuse import (monkey_patch_creation_for_db_reuse,
 from .django_compat import is_django_unittest
 from .lazy_django import skip_if_no_django
 
-__all__ = ['_django_db_setup', 'db', 'transactional_db',
+__all__ = ['_django_db_setup', 'db', 'transactional_db', 'admin_user',
            'client', 'admin_client', 'rf', 'settings', 'live_server',
            '_live_server_helper']
 
@@ -133,14 +133,15 @@ def client():
 
 
 @pytest.fixture()
-def admin_client(db):
-    """A Django test client logged in as an admin user"""
+def admin_user(db):
+    """A Django admin user"""
+    skip_if_no_django()
+
     try:
         from django.contrib.auth import get_user_model
         User = get_user_model()
     except ImportError:
         from django.contrib.auth.models import User
-    from django.test.client import Client
 
     try:
         User.objects.get(username='admin')
@@ -150,9 +151,20 @@ def admin_client(db):
         user.is_staff = True
         user.is_superuser = True
         user.save()
+    return user
+
+
+@pytest.fixture()
+def admin_client(db, admin_user):
+    """A Django test client logged in as an admin user"""
+    skip_if_no_django()
+
+    from django.test.client import Client
 
     client = Client()
-    client.login(username='admin', password='password')
+    client.login(
+        username=admin_user.username,
+        password='password')
     return client
 
 

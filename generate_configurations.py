@@ -11,13 +11,13 @@ TestEnv = namedtuple('TestEnv', ['python_version', 'django_version', 'settings']
 
 PYTHON_VERSIONS = ['python2.6', 'python2.7', 'python3.2', 'python3.3', 'python3.4', 'pypy']
 DJANGO_VERSIONS = ['1.3', '1.4', '1.5', '1.6', '1.7', 'master']
-SETTINGS = ['sqlite', 'mysql_myisam', 'mysql_innodb', 'postgres']
+SETTINGS = ['sqlite', 'sqlite_file', 'mysql_myisam', 'mysql_innodb', 'postgres']
 DJANGO_REQUIREMENTS = {
     '1.3': 'Django==1.3.7',
-    '1.4': 'Django==1.4.11',
-    '1.5': 'Django==1.5.6',
-    '1.6': 'Django==1.6.3',
-    '1.7': 'https://www.djangoproject.com/m/releases/1.7/Django-1.7b2.tar.gz',
+    '1.4': 'Django==1.4.13',
+    '1.5': 'Django==1.5.8',
+    '1.6': 'Django==1.6.5',
+    '1.7': 'https://www.djangoproject.com/m/releases/1.7/Django-1.7b4.tar.gz',
     'master': 'https://github.com/django/django/archive/master.zip',
 }
 
@@ -89,7 +89,8 @@ def commands(uid, env):
     if env.settings == 'postgres':
         yield 'sh -c "dropdb %(name)s; createdb %(name)s || exit 0"' % {'name': db_name}
 
-    yield 'py.test {posargs}'
+    # Show extra test summary info for everything.
+    yield 'py.test -r fEsxXw {posargs}'
 
 
 def testenv_name(env):

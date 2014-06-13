@@ -11,13 +11,13 @@ import pytest
 
 from .django_compat import is_django_unittest
 from .fixtures import (_django_db_setup, db, transactional_db, client,
-                       admin_client, rf, settings, live_server,
+                       admin_user, admin_client, rf, settings, live_server,
                        _live_server_helper)
 
 from .lazy_django import skip_if_no_django, django_settings_is_configured
 
 
-(_django_db_setup, db, transactional_db, client, admin_client, rf,
+(_django_db_setup, db, transactional_db, client, admin_user, admin_client, rf,
  settings, live_server, _live_server_helper)
 
 
@@ -73,13 +73,6 @@ def _load_settings(config, options):
             # Install the django-configurations importer
             import configurations.importer
             configurations.importer.install()
-
-        from django.conf import settings
-        try:
-            settings.DATABASES
-        except ImportError:
-            e = sys.exc_info()[1]
-            raise pytest.UsageError(*e.args)
 
 
 if pytest.__version__[:3] >= "2.4":
