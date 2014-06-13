@@ -90,9 +90,9 @@ class TestSqlite:
     }}
     from django import VERSION
     if VERSION > (1, 7):
-        db_settings['TEST'] = {'NAME': db_name_17}
+        db_settings['default']['TEST'] = {'NAME': db_name_17}
     else:
-        db_settings['TEST_NAME'] = db_name_before_17
+        db_settings['default']['TEST_NAME'] = db_name_before_17
 
 
     def test_sqlite_test_name_used(self, django_testdir):
