@@ -11,7 +11,11 @@ pytest_plugins = 'pytester'
 TESTS_DIR = py.path.local(__file__)
 
 
-from django.conf import settings
+
+@pytest.fixture()
+def django_settings():
+    from django.conf import settings
+    return settings
 
 
 # Trigger loading of Django settings, which might raise pytest.UsageError.
@@ -20,7 +24,7 @@ from .db_helpers import (create_empty_production_database, get_db_engine,
 
 
 @pytest.fixture(scope='function')
-def django_testdir(request, testdir, monkeypatch):
+def django_testdir(request, testdir, monkeypatch, django_settings):
     if get_db_engine() in ('mysql', 'postgresql_psycopg2', 'sqlite3'):
         # Django requires the production database to exists..
         create_empty_production_database()
@@ -28,7 +32,7 @@ def django_testdir(request, testdir, monkeypatch):
     if hasattr(request.node.cls, 'db_settings'):
         db_settings = request.node.cls.db_settings
     else:
-        db_settings = copy.deepcopy(settings.DATABASES)
+        db_settings = copy.deepcopy(django_settings.DATABASES)
         db_settings['default']['NAME'] = DB_NAME
 
     test_settings = dedent('''

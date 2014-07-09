@@ -12,7 +12,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'pytest_django' + db_suffix,
-        'HOST': 'localhost',
+        # HOST=None will use the UNIX socket (as with psql).
+        # 'HOST': 'localhost',
+        'HOST': None,
         'USER': '',
     },
 }
