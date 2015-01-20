@@ -1,8 +1,29 @@
 import pytest
+import unittest
 from django.test import TestCase
 
+from pytest_django.django_compat import is_django_unittest
 from pytest_django_test.app.models import Item
 from pytest_django_test.compat import force_text
+
+
+@pytest.fixture
+def _assert_is_django_unittest(request):
+    assert is_django_unittest(request)
+
+@pytest.mark.usefixtures('_assert_is_django_unittest')
+class TestCaseDjangoUnittest(TestCase):
+    def test_pass(self):
+        pass
+
+@pytest.fixture
+def _assert_is_not_django_unittest(request):
+    assert not is_django_unittest(request)
+
+@pytest.mark.usefixtures('_assert_is_not_django_unittest')
+class TestUnittest_is_django_unittest(unittest.TestCase):
+    def test_pass(self):
+        pass
 
 
 class TestFixtures(TestCase):
