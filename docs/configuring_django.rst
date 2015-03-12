@@ -65,12 +65,16 @@ INI File Contents::
 Using ``django.conf.settings.configure()``
 ------------------------------------------
 
-Django settings can be set up by calling ``django.conf.settings.configure()``.
-
-This can be done from your project's ``conftest.py`` file::
+Django settings can be alternatively set up by calling
+``django.conf.settings.configure()``, e.g. from your project's ``conftest.py``
+file::
 
     from django.conf import settings
 
     def pytest_configure():
         settings.configure(DATABASES=...)
 
+Please note that this method requires the ``DJANGO_SETTINGS_MODULE``
+environment variable to be unset, or you will get an error like "Settings
+already configured." (`Django documentation reference
+<https://docs.djangoproject.com/en/stable/topics/settings/#either-configure-or-django-settings-module-is-required>`).
