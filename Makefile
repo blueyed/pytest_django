@@ -2,28 +2,30 @@
 
 export DJANGO_SETTINGS_MODULE?=pytest_django_test.settings_sqlite_file
 
-testenv: bin/py.test
+VIRTUALENV:=build/venv
 
-test: bin/py.test
-	bin/pip install -e .
-	bin/py.test
+testenv: $(VIRTUALENV)/bin/py.test
 
-bin/python bin/pip:
-	virtualenv .
+test: $(VIRTUALENV)/bin/py.test
+	$(VIRTUALENV)/bin/pip install -e .
+	$(VIRTUALENV)/bin/py.test tests
 
-bin/py.test: bin/python requirements.txt
-	bin/pip install -Ur requirements.txt
+$(VIRTUALENV)/bin/python $(VIRTUALENV)/bin/pip:
+	virtualenv $(VIRTUALENV)
+
+$(VIRTUALENV)/bin/py.test: $(VIRTUALENV)/bin/python requirements.txt
+	$(VIRTUALENV)/bin/pip install -Ur requirements.txt
 	touch $@
 
-bin/sphinx-build: bin/pip
-	bin/pip install sphinx
+$(VIRTUALENV)/bin/sphinx-build: $(VIRTUALENV)/bin/pip
+	$(VIRTUALENV)/bin/pip install sphinx
 
-docs: bin/sphinx-build
-	SPHINXBUILD=../bin/sphinx-build $(MAKE) -C docs html
+docs: $(VIRTUALENV)/bin/sphinx-build
+	SPHINXBUILD=../$(VIRTUALENV)/bin/sphinx-build $(MAKE) -C docs html
 
 # See setup.cfg for configuration.
 isort:
 	find pytest_django tests -name '*.py' -exec isort {} +
 
 clean:
-	rm -rf bin include/ lib/ man/ pytest_django.egg-info/ build/
+	rm -rf pytest_django.egg-info/ build/
