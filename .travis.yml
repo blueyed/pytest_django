@@ -53,7 +53,7 @@ matrix:
       env: TOXENV=pypy3-pytest3-dj110-sqlite_file
 
   allow_failures:
-    - env: TOXENV=py36-pytest3-djangomaster-postgres
+    - env: TOXENV=py36-pytest3-djmaster-postgres
 
 cache:
   directories:
